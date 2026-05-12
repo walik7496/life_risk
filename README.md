@@ -54,7 +54,7 @@ Vanilla JavaScript
 
 Clone repository:
 
-git clone https://github.com/yourusername/life-risk.git
+git clone https://github.com/walik7496/life-risk.git
 
 Open:
 
@@ -70,7 +70,7 @@ Save
 
 Site URL:
 
-https://yourusername.github.io/life-risk/
+https://walik7496.github.io/life-risk/
 ⚠ Disclaimer
 
 This project is created for:
