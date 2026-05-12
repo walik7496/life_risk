@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LIFE OS — OVERKILL++</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:black;
+      color:white;
+      overflow:hidden;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+    }
+
+    canvas{position:fixed;inset:0;}
+
+    .card{
+      position:relative;
+      z-index:2;
+      width:520px;
+      background:rgba(255,255,255,0.06);
+      backdrop-filter:blur(18px);
+      padding:20px;
+      border-radius:22px;
+      box-shadow:0 30px 90px rgba(0,0,0,0.8);
+      text-align:center;
+    }
+
+    h1{font-size:20px;margin-bottom:10px;}
+
+    input,button{
+      width:100%;
+      padding:10px;
+      margin-top:10px;
+      border:none;
+      border-radius:10px;
+      font-size:14px;
+    }
+
+    button{background:#3b82f6;color:white;cursor:pointer;}
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:15px;
+    }
+
+    .box{
+      background:rgba(255,255,255,0.08);
+      padding:10px;
+      border-radius:10px;
+    }
+
+    .num{font-size:18px;font-weight:bold;}
+    .label{font-size:12px;opacity:0.7;}
+
+    .bar{
+      height:10px;
+      margin-top:10px;
+      background:rgba(255,255,255,0.1);
+      border-radius:10px;
+      overflow:hidden;
+    }
+
+    .fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#3b82f6,#22c55e);
+    }
+
+    .ai,.stats,.alt{
+      margin-top:10px;
+      font-size:12px;
+      opacity:0.85;
+      text-align:left;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="card">
+  <h1>🔥 LIFE OS — OVERKILL++</h1>
+
+  <input type="date" id="date">
+  <input type="time" id="time" value="00:00">
+  <input type="number" id="life" value="80" placeholder="Life expectancy">
+
+  <button onclick="start()">BOOT UNIVERSE</button>
+
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div id="percent" style="font-size:12px;margin-top:5px">0%</div>
+
+  <div class="grid">
+    <div class="box"><div class="num" id="years">0</div><div class="label">Years</div></div>
+    <div class="box"><div class="num" id="days">0</div><div class="label">Days</div></div>
+    <div class="box"><div class="num" id="hours">0</div><div class="label">Hours</div></div>
+    <div class="box"><div class="num" id="minutes">0</div><div class="label">Minutes</div></div>
+  </div>
+
+  <div class="ai" id="ai">AI: idle</div>
+  <div class="stats" id="stats">RPG: HP 100 | WIS 10 | LUCK 5</div>
+  <div class="alt" id="alt">ALT LIVES: calculating...</div>
+</div>
+
+<script>
+
+// ===== MATRIX BACKGROUND =====
+const c=document.getElementById("bg");
+const x=c.getContext("2d");
+c.width=innerWidth;c.height=innerHeight;
+
+let drops=Array.from({length:200},()=>Math.random()*c.height);
+
+function matrix(){
+  x.fillStyle="rgba(0,0,0,0.1)";
+  x.fillRect(0,0,c.width,c.height);
+  x.fillStyle="#22c55e";
+  x.font="10px monospace";
+
+  drops.forEach((y,i)=>{
+    let text=Math.random()>0.5?"1":"0";
+    x.fillText(text,i*8,y);
+    drops[i]=y>c.height?0:y+10;
+  });
+
+  requestAnimationFrame(matrix);
+}
+matrix();
+
+// ===== LIFE ENGINE =====
+let timer;
+let xp=0;
+
+function ai(age,p){
+  if(p<10) return "BOOT SEQUENCE";
+  if(p<40) return "BUILDING SELF MODEL";
+  if(p<70) return "RUNNING SIMULATION";
+  return "END STATE APPROACHING";
+}
+
+function altLives(age){
+  let base=80;
+  return `ALT: ${(base-age)+Math.floor(Math.random()*30)} possible timelines`;
+}
+
+function rpg(age){
+  return `HP ${100-age} | WIS ${10+age} | LUCK ${Math.floor(Math.random()*100)}`;
+}
+
+function start(){
+  if(timer) clearInterval(timer);
+
+  timer=setInterval(()=>{
+    const d=date.value;
+    const t=time.value;
+    const life=+document.getElementById("life").value;
+
+    if(!d) return;
+
+    const b=new Date(d+"T"+t);
+    const n=new Date();
+
+    let diff=n-b;
+
+    let sec=diff/1000;
+    let min=sec/60;
+    let hr=min/60;
+    let days=hr/24;
+    let years=days/365.25;
+
+    let pct=Math.min((years/life)*100,100);
+
+    years=Math.floor(years);
+
+    yearsEl.innerText=years;
+    daysEl.innerText=Math.floor(days);
+    hoursEl.innerText=Math.floor(hr);
+    minutesEl.innerText=Math.floor(min);
+
+    fill.style.width=pct+"%";
+    percent.innerText=pct.toFixed(2)+"% COMPLETED";
+
+    xp+=1;
+
+    aiBox.innerText="AI: "+ai(years,pct);
+    stats.innerText="RPG: "+rpg(years);
+    alt.innerText=altLives(years);
+
+    if(pct>99){
+      speechSynthesis.speak(new SpeechSynthesisUtterance("Simulation complete"));
+    }
+
+  },1000);
+}
+
+const fill=document.getElementById("fill");
+const percent=document.getElementById("percent");
+const aiBox=document.getElementById("ai");
+const stats=document.getElementById("stats");
+const alt=document.getElementById("alt");
+const yearsEl=document.getElementById("years");
+const daysEl=document.getElementById("days");
+const hoursEl=document.getElementById("hours");
+const minutesEl=document.getElementById("minutes");
+
+</script>
+
+</body>
+</html>

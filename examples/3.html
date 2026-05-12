@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Age Calculator ULTRA</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      width: 420px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px);
+      padding: 20px;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+    }
+
+    button {
+      background: #3b82f6;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      background: #2563eb;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .box {
+      background: rgba(255,255,255,0.08);
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .num {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .label {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .bar {
+      margin-top: 15px;
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #22c55e);
+      transition: 0.5s;
+    }
+
+    canvas {
+      margin-top: 15px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+    }
+
+    .achievements {
+      margin-top: 10px;
+      font-size: 12px;
+      opacity: 0.8;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🔥 Age Calculator ULTRA</h1>
+
+  <input type="date" id="date">
+  <input type="time" id="time" value="00:00">
+  <input type="number" id="life" value="80" placeholder="Очікувана тривалість життя">
+
+  <button onclick="start()">Запустити</button>
+
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div style="font-size:12px;margin-top:5px" id="percent">0%</div>
+
+  <canvas id="chart" width="380" height="120"></canvas>
+
+  <div class="grid">
+    <div class="box"><div class="num" id="years">0</div><div class="label">Роки</div></div>
+    <div class="box"><div class="num" id="days">0</div><div class="label">Дні</div></div>
+    <div class="box"><div class="num" id="hours">0</div><div class="label">Години</div></div>
+    <div class="box"><div class="num" id="minutes">0</div><div class="label">Хвилини</div></div>
+  </div>
+
+  <div class="achievements" id="ach">
+    🏆 Досягнення: ще немає
+  </div>
+</div>
+
+<script>
+let timer;
+let history = [];
+
+function drawChart() {
+  const c = document.getElementById("chart");
+  const ctx = c.getContext("2d");
+
+  ctx.clearRect(0,0,c.width,c.height);
+
+  ctx.beginPath();
+  ctx.strokeStyle = "#3b82f6";
+  ctx.lineWidth = 2;
+
+  history.forEach((v,i)=>{
+    const x = i * (c.width / 100);
+    const y = c.height - (v / 100 * c.height);
+
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  });
+
+  ctx.stroke();
+}
+
+function start() {
+  if(timer) clearInterval(timer);
+
+  timer = setInterval(()=>{
+    const d = document.getElementById("date").value;
+    const t = document.getElementById("time").value;
+    const life = +document.getElementById("life").value;
+
+    if(!d) return;
+
+    const birth = new Date(d+"T"+t);
+    const now = new Date();
+
+    const diff = now - birth;
+    if(diff < 0) return;
+
+    const sec = Math.floor(diff/1000);
+    const min = Math.floor(sec/60);
+    const hr = Math.floor(min/60);
+    const days = Math.floor(hr/24);
+    const years = Math.floor(days/365.25);
+
+    const percent = Math.min((years/life)*100,100).toFixed(2);
+
+    document.getElementById("years").innerText = years;
+    document.getElementById("days").innerText = days;
+    document.getElementById("hours").innerText = hr;
+    document.getElementById("minutes").innerText = min;
+
+    document.getElementById("fill").style.width = percent+"%";
+    document.getElementById("percent").innerText = percent+"% життя прожито";
+
+    history.push(percent);
+    if(history.length>100) history.shift();
+
+    drawChart();
+
+    let ach = "🏆 Досягнення: ";
+    if(years>1) ach += "1+ рік прожито ✔ ";
+    if(years>10) ach += "10+ років ✔ ";
+    if(years>18) ach += "повноліття ✔ ";
+    if(years>30) ach += "30+ рівень ✔ ";
+
+    document.getElementById("ach").innerText = ach;
+
+  },1000);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Age Calculator ULTRA+</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    canvas#bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      width: 440px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px);
+      padding: 20px;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+    }
+
+    button {
+      background: #3b82f6;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      background: #2563eb;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .box {
+      background: rgba(255,255,255,0.08);
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .num { font-size: 18px; font-weight: bold; }
+    .label { font-size: 12px; opacity: 0.7; }
+
+    .bar {
+      margin-top: 15px;
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #22c55e);
+      transition: 0.5s;
+    }
+
+    .small {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 6px;
+    }
+
+    .risk {
+      margin-top: 10px;
+      font-size: 13px;
+      opacity: 0.9;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="card">
+  <h1>🔥 Age Calculator ULTRA+</h1>
+
+  <input type="date" id="date">
+  <input type="time" id="time" value="00:00">
+
+  <input type="text" id="dobRaw" placeholder="DOB (DD.MM.YYYY або DDMMYYYY)">
+
+  <input type="number" id="life" value="80" placeholder="Очікувана тривалість життя">
+
+  <button onclick="start()">Запустити</button>
+
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div class="small" id="percent">0%</div>
+
+  <div class="risk" id="risk">🧬 Life risk: -</div>
+
+  <div class="grid">
+    <div class="box"><div class="num" id="years">0</div><div class="label">Роки</div></div>
+    <div class="box"><div class="num" id="days">0</div><div class="label">Дні</div></div>
+    <div class="box"><div class="num" id="hours">0</div><div class="label">Години</div></div>
+    <div class="box"><div class="num" id="minutes">0</div><div class="label">Хвилини</div></div>
+  </div>
+</div>
+
+<script>
+
+// ===== Particle background =====
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = Array.from({length: 60}, () => ({
+  x: Math.random()*canvas.width,
+  y: Math.random()*canvas.height,
+  r: Math.random()*2+1,
+  dx: (Math.random()-0.5)*0.5,
+  dy: (Math.random()-0.5)*0.5
+}));
+
+function animateBg(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.x += p.dx;
+    p.y += p.dy;
+
+    if(p.x<0||p.x>canvas.width) p.dx*=-1;
+    if(p.y<0||p.y>canvas.height) p.dy*=-1;
+
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle="rgba(255,255,255,0.3)";
+    ctx.fill();
+  });
+  requestAnimationFrame(animateBg);
+}
+animateBg();
+
+// ===== Age system =====
+let timer;
+
+function calcRisk(dob){
+  if(!dob) return "-";
+
+  let clean = dob.replace(/\./g,"");
+
+  if(clean.length===8 && !isNaN(clean)){
+    let n1 = clean.split("").reduce((a,b)=>a+ +b,0);
+    let n2 = n1 + parseInt(clean.slice(2,4))*3;
+    return `n1=${n1}, n2=${n2}`;
+  }
+
+  return "Invalid format";
+}
+
+function start(){
+  if(timer) clearInterval(timer);
+
+  timer=setInterval(()=>{
+    const d=document.getElementById("date").value;
+    const t=document.getElementById("time").value;
+    const life=+document.getElementById("life").value;
+    const dob=document.getElementById("dobRaw").value;
+
+    if(!d) return;
+
+    const birth=new Date(d+"T"+t);
+    const now=new Date();
+
+    let diff=now-birth;
+    if(diff<0) return;
+
+    let sec=Math.floor(diff/1000);
+    let min=Math.floor(sec/60);
+    let hr=Math.floor(min/60);
+    let days=Math.floor(hr/24);
+    let years=Math.floor(days/365.25);
+
+    let percent=Math.min((years/life)*100,100).toFixed(2);
+
+    document.getElementById("years").innerText=years;
+    document.getElementById("days").innerText=days;
+    document.getElementById("hours").innerText=hr;
+    document.getElementById("minutes").innerText=min;
+
+    document.getElementById("fill").style.width=percent+"%";
+    document.getElementById("percent").innerText=percent+"% життя прожито";
+
+    document.getElementById("risk").innerText="🧬 Life risk: " + calcRisk(dob);
+
+  },1000);
+}
+
+</script>
+
+</body>
+</html>

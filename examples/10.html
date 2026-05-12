@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LIFE OS — TRANSCEND MODE</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:#000;
+      color:#fff;
+      overflow:hidden;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+    }
+
+    canvas#bg, canvas#webgl{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:0;
+    }
+
+    .card{
+      position:relative;
+      z-index:2;
+      width:540px;
+      background:rgba(255,255,255,0.06);
+      backdrop-filter:blur(18px);
+      padding:18px;
+      border-radius:22px;
+      box-shadow:0 30px 90px rgba(0,0,0,0.8);
+      text-align:center;
+    }
+
+    h1{font-size:18px;margin:6px 0;}
+
+    input,button{
+      width:100%;
+      padding:10px;
+      margin-top:8px;
+      border:none;
+      border-radius:10px;
+      font-size:14px;
+    }
+
+    button{background:#3b82f6;color:white;cursor:pointer;}
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .box{
+      background:rgba(255,255,255,0.08);
+      padding:8px;
+      border-radius:10px;
+    }
+
+    .num{font-size:16px;font-weight:bold;}
+    .label{font-size:11px;opacity:0.7;}
+
+    .bar{
+      height:10px;
+      margin-top:8px;
+      background:rgba(255,255,255,0.1);
+      border-radius:10px;
+      overflow:hidden;
+    }
+
+    .fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#3b82f6,#22c55e);
+    }
+
+    .panel{
+      margin-top:8px;
+      font-size:12px;
+      opacity:0.85;
+      text-align:left;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+<canvas id="webgl"></canvas>
+
+<div class="card">
+  <h1>🚀 LIFE OS — TRANSCEND MODE</h1>
+
+  <input type="date" id="date">
+  <input type="time" id="time" value="00:00">
+  <input type="number" id="life" value="80" placeholder="Life expectancy">
+
+  <button onclick="start()">ENTER SIMULATION</button>
+
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div id="percent" style="font-size:12px;margin-top:5px">0%</div>
+
+  <div class="grid">
+    <div class="box"><div class="num" id="years">0</div><div class="label">Years</div></div>
+    <div class="box"><div class="num" id="days">0</div><div class="label">Days</div></div>
+    <div class="box"><div class="num" id="hours">0</div><div class="label">Hours</div></div>
+    <div class="box"><div class="num" id="minutes">0</div><div class="label">Minutes</div></div>
+  </div>
+
+  <div class="panel" id="ai">AI: standby</div>
+  <div class="panel" id="alt">ALT: unknown timelines</div>
+  <div class="panel" id="quest">QUEST: initialize</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+
+// ================= MATRIX BACKGROUND =================
+const bg=document.getElementById("bg");
+const bx=bg.getContext("2d");
+bg.width=innerWidth;
+bg.height=innerHeight;
+
+let drops=Array.from({length:160},()=>Math.random()*bg.height);
+
+function matrix(){
+  bx.fillStyle="rgba(0,0,0,0.12)";
+  bx.fillRect(0,0,bg.width,bg.height);
+  bx.fillStyle="#22c55e";
+  bx.font="10px monospace";
+
+  drops.forEach((y,i)=>{
+    let t=Math.random()>0.5?"1":"0";
+    bx.fillText(t,i*8,y);
+    drops[i]=y>bg.height?0:y+10;
+  });
+
+  requestAnimationFrame(matrix);
+}
+matrix();
+
+// ================= THREE JS (TRANSCEND CORE) =================
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById("webgl"),alpha:true});
+renderer.setSize(innerWidth,innerHeight);
+
+const geometry=new THREE.TorusGeometry(10,3,16,100);
+const material=new THREE.MeshBasicMaterial({color:0x3b82f6,wireframe:true});
+const torus=new THREE.Mesh(geometry,material);
+scene.add(torus);
+
+camera.position.z=30;
+
+function animate3D(){
+  requestAnimationFrame(animate3D);
+  torus.rotation.x+=0.01;
+  torus.rotation.y+=0.02;
+  renderer.render(scene,camera);
+}
+animate3D();
+
+// ================= LIFE ENGINE =================
+let timer;
+
+function hash(n){return Math.abs(Math.sin(n)*10000)%1;}
+
+function ai(age,p){
+  if(p<20) return "BOOT: constructing identity matrix";
+  if(p<50) return "RUN: simulating consciousness layers";
+  if(p<80) return "SYNC: reality coherence stabilizing";
+  return "TRANSCEND: ego dissolution active";
+}
+
+function alt(age){
+  return "ALT TIMELINES: "+Math.floor(hash(age*999)*10000)+" branches detected";
+}
+
+function quest(age){
+  if(age<18) return "QUEST: form self";
+  if(age<30) return "QUEST: build world model";
+  if(age<50) return "QUEST: dominate entropy";
+  return "QUEST: transcend simulation";
+}
+
+function start(){
+  if(timer) clearInterval(timer);
+
+  timer=setInterval(()=>{
+
+    const d=date.value;
+    const t=time.value;
+    const life=+document.getElementById("life").value;
+
+    if(!d) return;
+
+    const b=new Date(d+"T"+t);
+    const n=new Date();
+    const diff=n-b;
+
+    let sec=diff/1000;
+    let min=sec/60;
+    let hr=min/60;
+    let days=hr/24;
+    let years=days/365.25;
+
+    let pct=Math.min((years/life)*100,100);
+
+    years=Math.floor(years);
+
+    yearsEl.innerText=years;
+    daysEl.innerText=Math.floor(days);
+    hoursEl.innerText=Math.floor(hr);
+    minutesEl.innerText=Math.floor(min);
+
+    fill.style.width=pct+"%";
+    percent.innerText=pct.toFixed(2)+"% COMPLETED";
+
+    aiBox.innerText="AI: "+ai(years,pct);
+    altBox.innerText=alt(years);
+    questBox.innerText=quest(years);
+
+  },1000);
+}
+
+// ================= DOM =================
+const fill=document.getElementById("fill");
+const percent=document.getElementById("percent");
+const aiBox=document.getElementById("ai");
+const altBox=document.getElementById("alt");
+const questBox=document.getElementById("quest");
+const yearsEl=document.getElementById("years");
+const daysEl=document.getElementById("days");
+const hoursEl=document.getElementById("hours");
+const minutesEl=document.getElementById("minutes");
+
+</script>
+
+</body>
+</html>

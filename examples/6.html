@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Age Calculator GOD MODE</title>
+
+  <!-- PWA MANIFEST -->
+  <link rel="manifest" href="data:application/manifest+json,{\"name\":\"Life OS GOD MODE\",\"short_name\":\"LifeOS\",\"start_url\":\".\",\"display\":\"standalone\",\"background_color\":\"#020617\",\"theme_color\":\"#0f172a\"}" />
+
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:radial-gradient(circle at top,#0f172a,#020617);
+      color:white;
+      overflow:hidden;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+    }
+
+    canvas#bg{
+      position:fixed;
+      inset:0;
+      z-index:0;
+    }
+
+    .card{
+      position:relative;
+      z-index:2;
+      width:480px;
+      background:rgba(255,255,255,0.06);
+      backdrop-filter:blur(16px);
+      padding:20px;
+      border-radius:20px;
+      box-shadow:0 25px 80px rgba(0,0,0,0.7);
+      text-align:center;
+    }
+
+    h1{font-size:20px;margin-bottom:10px;}
+
+    input,button{
+      width:100%;
+      padding:10px;
+      margin-top:10px;
+      border:none;
+      border-radius:10px;
+      font-size:14px;
+    }
+
+    button{
+      background:#3b82f6;
+      color:white;
+      cursor:pointer;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:15px;
+    }
+
+    .box{
+      background:rgba(255,255,255,0.08);
+      padding:10px;
+      border-radius:10px;
+    }
+
+    .num{font-size:18px;font-weight:bold;}
+    .label{font-size:12px;opacity:0.7;}
+
+    .bar{
+      height:10px;
+      margin-top:10px;
+      background:rgba(255,255,255,0.1);
+      border-radius:10px;
+      overflow:hidden;
+    }
+
+    .fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#3b82f6,#22c55e);
+    }
+
+    .xp{
+      margin-top:10px;
+      font-size:12px;
+      opacity:0.8;
+      text-align:left;
+    }
+
+    canvas#timeline{
+      margin-top:10px;
+      width:100%;
+      height:120px;
+      background:rgba(255,255,255,0.05);
+      border-radius:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="card">
+  <h1>🔥 LIFE OS — GOD MODE</h1>
+
+  <input type="date" id="date">
+  <input type="time" id="time" value="00:00">
+  <input type="number" id="life" value="80" placeholder="Life expectancy">
+
+  <button onclick="start()">INIT SYSTEM</button>
+
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div id="percent" style="font-size:12px;margin-top:5px">0%</div>
+
+  <div class="grid">
+    <div class="box"><div class="num" id="years">0</div><div class="label">Years</div></div>
+    <div class="box"><div class="num" id="days">0</div><div class="label">Days</div></div>
+    <div class="box"><div class="num" id="hours">0</div><div class="label">Hours</div></div>
+    <div class="box"><div class="num" id="minutes">0</div><div class="label">Minutes</div></div>
+  </div>
+
+  <canvas id="timeline"></canvas>
+
+  <div class="xp" id="xp">XP: 0 | Level: 0 | Status: standby</div>
+</div>
+
+<script>
+
+// ===== Background =====
+const bg=document.getElementById("bg");
+const bx=bg.getContext("2d");
+bg.width=innerWidth;
+bg.height=innerHeight;
+
+let p=Array.from({length:90},()=>({
+  x:Math.random()*bg.width,
+  y:Math.random()*bg.height,
+  r:Math.random()*2,
+  dx:(Math.random()-0.5)*0.6,
+  dy:(Math.random()-0.5)*0.6
+}));
+
+function anim(){
+  bx.clearRect(0,0,bg.width,bg.height);
+  p.forEach(i=>{
+    i.x+=i.dx;
+    i.y+=i.dy;
+    if(i.x<0||i.x>bg.width)i.dx*=-1;
+    if(i.y<0||i.y>bg.height)i.dy*=-1;
+    bx.beginPath();
+    bx.arc(i.x,i.y,i.r,0,Math.PI*2);
+    bx.fillStyle="rgba(255,255,255,0.25)";
+    bx.fill();
+  });
+  requestAnimationFrame(anim);
+}
+anim();
+
+// ===== Timeline =====
+const tcv=document.getElementById("timeline");
+const tctx=tcv.getContext("2d");
+tcv.width=420;
+tcv.height=120;
+let history=[];
+
+function draw(){
+  tctx.clearRect(0,0,tcv.width,tcv.height);
+  tctx.beginPath();
+  tctx.strokeStyle="#3b82f6";
+  tctx.lineWidth=2;
+
+  history.forEach((v,i)=>{
+    let x=i*(tcv.width/100);
+    let y=tcv.height-(v/100*tcv.height);
+    if(i===0)tctx.moveTo(x,y);
+    else tctx.lineTo(x,y);
+  });
+
+  tctx.stroke();
+}
+
+// ===== SYSTEM =====
+let timer;
+let xp=0;
+let level=0;
+
+function lifeAI(age,pct){
+  if(pct<20) return "BOOT SEQUENCE ACTIVE";
+  if(pct<50) return "BUILD PHASE";
+  if(pct<80) return "PEAK HUMAN PERFORMANCE";
+  return "ENDGAME MODE DETECTED";
+}
+
+function start(){
+  if(timer) clearInterval(timer);
+
+  timer=setInterval(()=>{
+    const d=date.value;
+    const t=time.value;
+    const life=+document.getElementById("life").value;
+
+    if(!d) return;
+
+    const birth=new Date(d+"T"+t);
+    const now=new Date();
+
+    let diff=now-birth;
+
+    let sec=diff/1000;
+    let min=sec/60;
+    let hr=min/60;
+    let days=hr/24;
+    let years=days/365.25;
+
+    let pct=Math.min((years/life)*100,100);
+
+    years=Math.floor(years);
+
+    document.getElementById("years").innerText=years;
+    document.getElementById("days").innerText=Math.floor(days);
+    document.getElementById("hours").innerText=Math.floor(hr);
+    document.getElementById("minutes").innerText=Math.floor(min);
+
+    fill.style.width=pct+"%";
+    percent.innerText=pct.toFixed(2)+"% LIFE COMPLETED";
+
+    // XP SYSTEM
+    xp+=1;
+    level=Math.floor(xp/100);
+
+    xpEl.innerText=`XP: ${xp} | Level: ${level} | Status: ${lifeAI(years,pct.toFixed(0))}`;
+
+    history.push(pct);
+    if(history.length>100)history.shift();
+    draw();
+
+  },1000);
+}
+
+const fill=document.getElementById("fill");
+const percent=document.getElementById("percent");
+const xpEl=document.getElementById("xp");
+
+</script>
+
+</body>
+</html>

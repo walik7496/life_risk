@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Age Calculator</title>
+
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #111;
+      --btn: #007bff;
+      --btnHover: #0056b3;
+    }
+
+    body.dark {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --btn: #3b82f6;
+      --btnHover: #2563eb;
+    }
+	
+	*{
+      box-sizing:border-box;
+	}
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      transition: 0.3s;
+	  overflow-x:hidden;
+    }
+
+    .box {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 14px;
+      width: 340px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      background: var(--btn);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--btnHover);
+    }
+
+    .result {
+      margin-top: 15px;
+      font-size: 14px;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .toggle {
+      cursor: pointer;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: #8883;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <div class="top">
+    <h2>Age Calculator</h2>
+    <div class="toggle" onclick="toggleTheme()">🌙/☀️</div>
+  </div>
+
+  <input type="date" id="birthDate">
+  <input type="time" id="birthTime" value="00:00">
+
+  <button onclick="calc()">Розрахувати</button>
+
+  <div class="result" id="result">Enter the date and press the button</div>
+</div>
+
+<script>
+let interval;
+
+function calc() {
+  if (interval) clearInterval(interval);
+
+  interval = setInterval(update, 1000);
+  update();
+}
+
+function update() {
+  const date = document.getElementById("birthDate").value;
+  const time = document.getElementById("birthTime").value;
+  const result = document.getElementById("result");
+
+  if (!date) {
+    result.innerText = "Enter date!";
+    return;
+  }
+
+  const birth = new Date(date + "T" + time);
+  const now = new Date();
+  const diff = now - birth;
+
+  if (diff < 0) {
+    result.innerText = "Date in the future!";
+    return;
+  }
+
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const years = Math.floor(days / 365.25);
+  const months = Math.floor(days / 30.44);
+
+  result.innerHTML = `
+    <b>Your age:</b><br>
+    ${years} years<br>
+    ${months} months<br>
+    ${days} days<br>
+    ${hours} hours<br>
+    ${minutes} minutes<br>
+    ${seconds} seconds
+  `;
+}
+
+function toggleTheme() {
+  document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>

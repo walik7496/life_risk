@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Age Calculator BOSS MODE</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="data:application/manifest+json,{\"name\":\"Age Calculator BOSS\",\"short_name\":\"AgeBoss\",\"start_url\":\".\",\"display\":\"standalone\",\"background_color\":\"#020617\",\"theme_color\":\"#0f172a\"}" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    canvas#bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .card {
+      position: relative;
+      z-index: 2;
+      width: 460px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(16px);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.7);
+      text-align: center;
+    }
+
+    h1 { font-size: 20px; }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+    }
+
+    button {
+      background: #3b82f6;
+      color: white;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .box {
+      background: rgba(255,255,255,0.08);
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .num { font-size: 18px; font-weight: bold; }
+    .label { font-size: 12px; opacity: 0.7; }
+
+    .bar {
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg,#3b82f6,#22c55e);
+    }
+
+    .ai {
+      margin-top: 10px;
+      font-size: 13px;
+      opacity: 0.85;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="card">
+  <h1>🔥 BOSS MODE LIFE TRACKER</h1>
+
+  <input type="date" id="date">
+  <input type="time" id="time" value="00:00">
+  <input type="text" id="dobRaw" placeholder="DOB (DD.MM.YYYY або DDMMYYYY)">
+  <input type="number" id="life" value="80" placeholder="Life expectancy">
+
+  <button onclick="start()">START SYSTEM</button>
+
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div id="percent" style="font-size:12px;margin-top:5px">0%</div>
+
+  <div class="grid">
+    <div class="box"><div class="num" id="years">0</div><div class="label">Years</div></div>
+    <div class="box"><div class="num" id="days">0</div><div class="label">Days</div></div>
+    <div class="box"><div class="num" id="hours">0</div><div class="label">Hours</div></div>
+    <div class="box"><div class="num" id="minutes">0</div><div class="label">Minutes</div></div>
+  </div>
+
+  <div class="ai" id="ai">🤖 AI: waiting for data...</div>
+</div>
+
+<script>
+
+// ===== PWA Service Worker =====
+if('serviceWorker' in navigator){
+  const sw = `self.addEventListener('install',e=>self.skipWaiting());
+  self.addEventListener('fetch',e=>{});`;
+  const blob = new Blob([sw], {type:'text/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob));
+}
+
+// ===== Background particles =====
+const c=document.getElementById("bg");
+const x=c.getContext("2d");
+c.width=innerWidth;c.height=innerHeight;
+let p=Array.from({length:80},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*2,dx:(Math.random()-0.5),dy:(Math.random()-0.5)}));
+
+function bg(){
+  x.clearRect(0,0,c.width,c.height);
+  p.forEach(i=>{
+    i.x+=i.dx;i.y+=i.dy;
+    if(i.x<0||i.x>c.width)i.dx*=-1;
+    if(i.y<0||i.y>c.height)i.dy*=-1;
+    x.beginPath();x.arc(i.x,i.y,i.r,0,7);
+    x.fillStyle="rgba(255,255,255,0.3)";
+    x.fill();
+  });
+  requestAnimationFrame(bg);
+}
+bg();
+
+// ===== LIFE ENGINE =====
+let t;
+
+function risk(d){
+  if(!d) return "-";
+  let c=d.replace(/\./g,""");
+  if(c.length!==8||isNaN(c)) return "invalid";
+  let n1=[...c].reduce((a,b)=>a+ +b,0);
+  let n2=n1+parseInt(c.slice(2,4))*3;
+  return n1+" / "+n2;
+}
+
+function ai(age,percent){
+  if(age<18) return "🧠 AI: early-stage life initialization";
+  if(age<30) return "⚡ AI: building foundation phase";
+  if(age<50) return "🔥 AI: peak performance phase";
+  if(percent>70) return "⏳ AI: advanced lifecycle stage detected";
+  return "🤖 AI: processing...";
+}
+
+function start(){
+  if(t) clearInterval(t);
+
+  t=setInterval(()=>{
+    const d=date.value;
+    const tm=time.value;
+    const life=+document.getElementById("life").value;
+    const dob=dobRaw.value;
+
+    if(!d) return;
+
+    let b=new Date(d+"T"+tm);
+    let now=new Date();
+    let diff=now-b;
+
+    let s=diff/1000;
+    let m=s/60;
+    let h=m/60;
+    let days=h/24;
+    let years=days/365.25;
+
+    let percent=Math.min((years/life)*100,100).toFixed(2);
+
+    years=Math.floor(years);
+    days=Math.floor(days);
+    h=Math.floor(h);
+    m=Math.floor(m);
+
+    yearsEl.innerText=years;
+    daysEl.innerText=days;
+    hoursEl.innerText=h;
+    minutesEl.innerText=m;
+
+    fill.style.width=percent+"%";
+    percentEl.innerText=percent+"% life completed";
+
+    riskBox.innerText="🧬 Risk: "+risk(dob);
+    aiBox.innerText=ai(years,percent);
+
+  },1000);
+}
+
+</script>
+
+</body>
+</html>

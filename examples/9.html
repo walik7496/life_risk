@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LIFE OS — ∞ MODE</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:black;
+      color:white;
+      overflow:hidden;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+    }
+
+    canvas#bg{
+      position:fixed;
+      inset:0;
+      z-index:0;
+    }
+
+    .card{
+      position:relative;
+      z-index:2;
+      width:520px;
+      background:rgba(255,255,255,0.06);
+      backdrop-filter:blur(18px);
+      padding:18px;
+      border-radius:22px;
+      box-shadow:0 30px 90px rgba(0,0,0,0.8);
+      text-align:center;
+    }
+
+    h1{font-size:18px;margin-bottom:10px;}
+
+    input,button{
+      width:100%;
+      padding:10px;
+      margin-top:8px;
+      border:none;
+      border-radius:10px;
+      font-size:14px;
+    }
+
+    button{background:#3b82f6;color:white;cursor:pointer;}
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .box{
+      background:rgba(255,255,255,0.08);
+      padding:8px;
+      border-radius:10px;
+    }
+
+    .num{font-size:16px;font-weight:bold;}
+    .label{font-size:11px;opacity:0.7;}
+
+    .bar{
+      height:10px;
+      margin-top:8px;
+      background:rgba(255,255,255,0.1);
+      border-radius:10px;
+      overflow:hidden;
+    }
+
+    .fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#3b82f6,#22c55e);
+    }
+
+    .panel{
+      margin-top:10px;
+      font-size:12px;
+      opacity:0.85;
+      text-align:left;
+    }
+
+    #cubeCanvas{
+      width:100%;
+      height:120px;
+      background:rgba(255,255,255,0.05);
+      border-radius:10px;
+      margin-top:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="card">
+  <h1>🔥 LIFE OS — ∞ MODE</h1>
+
+  <input type="date" id="date">
+  <input type="time" id="time" value="00:00">
+  <input type="number" id="life" value="80" placeholder="Life expectancy">
+
+  <button onclick="start()">BOOT ∞ SIMULATION</button>
+
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div id="percent" style="font-size:12px;margin-top:5px">0%</div>
+
+  <div class="grid">
+    <div class="box"><div class="num" id="years">0</div><div class="label">Years</div></div>
+    <div class="box"><div class="num" id="days">0</div><div class="label">Days</div></div>
+    <div class="box"><div class="num" id="hours">0</div><div class="label">Hours</div></div>
+    <div class="box"><div class="num" id="minutes">0</div><div class="label">Minutes</div></div>
+  </div>
+
+  <canvas id="cubeCanvas"></canvas>
+
+  <div class="panel" id="ai">AI: idle</div>
+  <div class="panel" id="alt">ALT: loading timelines...</div>
+  <div class="panel" id="quest">QUEST: none</div>
+</div>
+
+<script>
+
+// ================= MATRIX BACKGROUND =================
+const bg=document.getElementById("bg");
+const b=bg.getContext("2d");
+bg.width=innerWidth;
+bg.height=innerHeight;
+
+let drops=Array.from({length:180},()=>Math.random()*bg.height);
+
+function matrix(){
+  b.fillStyle="rgba(0,0,0,0.12)";
+  b.fillRect(0,0,bg.width,bg.height);
+  b.fillStyle="#22c55e";
+  b.font="10px monospace";
+
+  drops.forEach((y,i)=>{
+    let txt=Math.random()>0.5?"1":"0";
+    b.fillText(txt,i*7,y);
+    drops[i]=y>bg.height?0:y+10;
+  });
+
+  requestAnimationFrame(matrix);
+}
+matrix();
+
+// ================= 3D CUBE =================
+const cc=document.getElementById("cubeCanvas");
+const cx=cc.getContext("2d");
+cc.width=480;cc.height=120;
+
+let angle=0;
+function cube(){
+  cx.clearRect(0,0,cc.width,cc.height);
+
+  let size=40;
+  angle+=0.03;
+
+  let x=cc.width/2;
+  let y=cc.height/2;
+
+  cx.strokeStyle="#3b82f6";
+  cx.beginPath();
+
+  let offset=Math.sin(angle)*20;
+
+  cx.rect(x-size+offset,y-size,80,80);
+  cx.stroke();
+
+  requestAnimationFrame(cube);
+}
+cube();
+
+// ================= LIFE ENGINE =================
+let timer;
+let xp=0;
+
+function ai(age,p){
+  if(p<20) return "BOOTING UNIVERSE...";
+  if(p<50) return "SIMULATION RUNNING";
+  if(p<80) return "HIGH COMPLEXITY STATE";
+  return "∞ FINAL STATE ACTIVE";
+}
+
+function alt(age){
+  return `ALT TIMELINES: ${Math.floor(Math.random()*999)} variations detected`;
+}
+
+function quest(age){
+  if(age<18) return "QUEST: survive childhood";
+  if(age<30) return "QUEST: build identity";
+  if(age<50) return "QUEST: dominate system";
+  return "QUEST: transcend existence";
+}
+
+// ================= START =================
+function start(){
+  if(timer) clearInterval(timer);
+
+  timer=setInterval(()=>{
+
+    const d=date.value;
+    const t=time.value;
+    const life=+document.getElementById("life").value;
+
+    if(!d) return;
+
+    let b=new Date(d+"T"+t);
+    let n=new Date();
+
+    let diff=n-b;
+
+    let sec=diff/1000;
+    let min=sec/60;
+    let hr=min/60;
+    let days=hr/24;
+    let years=days/365.25;
+
+    let pct=Math.min((years/life)*100,100);
+
+    years=Math.floor(years);
+
+    yearsEl.innerText=years;
+    daysEl.innerText=Math.floor(days);
+    hoursEl.innerText=Math.floor(hr);
+    minutesEl.innerText=Math.floor(min);
+
+    fill.style.width=pct+"%";
+    percent.innerText=pct.toFixed(2)+"% LIFE COMPLETED";
+
+    xp++;
+
+    aiBox.innerText="AI: "+ai(years,pct);
+    altBox.innerText=alt(years);
+    questBox.innerText=quest(years);
+
+    if(pct>=100){
+      speechSynthesis.speak(new SpeechSynthesisUtterance("Infinity simulation completed"));
+      clearInterval(timer);
+    }
+
+  },1000);
+}
+
+const fill=document.getElementById("fill");
+const percent=document.getElementById("percent");
+const aiBox=document.getElementById("ai");
+const altBox=document.getElementById("alt");
+const questBox=document.getElementById("quest");
+const yearsEl=document.getElementById("years");
+const daysEl=document.getElementById("days");
+const hoursEl=document.getElementById("hours");
+const minutesEl=document.getElementById("minutes");
+
+</script>
+
+</body>
+</html>

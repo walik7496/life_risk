@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Life Risk Calculator</title>
+
+<style>
+    *{
+        box-sizing:border-box;
+    }
+
+    body{
+        margin:0;
+        min-height:100vh;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        background:#0f172a;
+        font-family:Arial,sans-serif;
+        color:white;
+    }
+
+    .card{
+        width:min(400px,90vw);
+        background:rgba(255,255,255,0.08);
+        padding:20px;
+        border-radius:20px;
+        box-shadow:0 20px 50px rgba(0,0,0,0.5);
+        text-align:center;
+    }
+
+    h1{
+        margin-bottom:20px;
+    }
+
+    input{
+        width:100%;
+        padding:12px;
+        border:none;
+        border-radius:10px;
+        margin-bottom:10px;
+        font-size:16px;
+    }
+
+    button{
+        width:100%;
+        padding:12px;
+        border:none;
+        border-radius:10px;
+        background:#3b82f6;
+        color:white;
+        font-size:16px;
+        cursor:pointer;
+    }
+
+    .result{
+        margin-top:20px;
+        background:rgba(255,255,255,0.05);
+        padding:15px;
+        border-radius:12px;
+    }
+
+    .big{
+        font-size:22px;
+        font-weight:bold;
+        margin:10px 0;
+    }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+    <h1>🧬 Life Risk Calculator</h1>
+
+    <input type="date" id="birthDate">
+
+    <button onclick="calculate()">
+        Calculate
+    </button>
+
+    <div class="result">
+
+        <div>
+            🎂 Age
+        </div>
+
+        <div class="big" id="age">
+            0
+        </div>
+
+        <div>
+            ⚠ Life Risk
+        </div>
+
+        <div class="big" id="risk">
+            0 / 0
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function calculate(){
+
+    const input = document.getElementById("birthDate").value;
+
+    if(!input){
+        alert("Вибери дату");
+        return;
+    }
+
+    // ===== AGE =====
+
+    const birth = new Date(input);
+    const now = new Date();
+
+    let age = now.getFullYear() - birth.getFullYear();
+
+    const m = now.getMonth() - birth.getMonth();
+
+    if(m < 0 || (m === 0 && now.getDate() < birth.getDate())){
+        age--;
+    }
+
+    document.getElementById("age").innerText = age;
+
+    // ===== LIFE RISK =====
+
+    const clean = input.replaceAll("-", "");
+
+    let n1 = 0;
+
+    for(let i = 0; i < clean.length; i++){
+        n1 += Number(clean[i]);
+    }
+
+    const month = Number(clean.slice(4,6));
+
+    const n2 = n1 + month * 3;
+
+    document.getElementById("risk").innerText =
+        n1 + " / " + n2;
+}
+
+</script>
+
+</body>
+</html>
